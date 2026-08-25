@@ -1,5 +1,6 @@
 import { CONDITIONS, PLAN_INFO } from '../data/kommoData'
 import { formatBRL } from '../utils/calculations'
+import Logo from './Logo'
 
 export default function SummaryView({ result, form, onBack }) {
   const { pricePerUser, monthlyTotal, contractTotal, freeMonth, durationMonths, installmentValue, isCustom } = result
@@ -21,8 +22,11 @@ export default function SummaryView({ result, form, onBack }) {
       </button>
 
       <div className="card card-highlight" style={{ padding: 40 }}>
+        <div style={{ marginBottom: 20 }}>
+          <Logo size={32} />
+        </div>
         <div className="eyebrow" style={{ marginBottom: 10 }}>
-          Stack Digital · Proposta Comercial Kommo
+          Proposta Comercial Kommo
         </div>
         <h1 style={{ fontSize: '2rem', marginBottom: 6 }}>
           Plano {PLAN_INFO[form.plan].label}

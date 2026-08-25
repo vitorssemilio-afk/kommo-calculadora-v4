@@ -1,3 +1,5 @@
+import Logo from './Logo'
+
 export default function Header() {
   return (
     <header
@@ -13,8 +15,11 @@ export default function Header() {
       }}
     >
       <div>
+        <div style={{ marginBottom: 16 }}>
+          <Logo size={36} />
+        </div>
         <div className="eyebrow" style={{ marginBottom: 10 }}>
-          Stack Digital · Parceira Oficial Kommo
+          Parceira Oficial Kommo
         </div>
         <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)' }}>
           Calculadora <span style={{ color: 'var(--red)' }}>Kommo</span>
