@@ -1,6 +1,6 @@
 import { PLAN_INFO, PLAN_ORDER, TERMS } from '../data/kommoData'
 
-export default function PriceConfigPanel({ open, onToggle, priceTable, onPriceChange, empresarialNote, onNoteChange }) {
+export default function PriceConfigPanel({ open, onToggle, priceTable, onPriceChange, onReset, empresarialNote, onNoteChange }) {
   return (
     <section className="card" style={{ marginBottom: 24 }}>
       <button
@@ -70,9 +70,36 @@ export default function PriceConfigPanel({ open, onToggle, priceTable, onPriceCh
             />
           </div>
 
-          <p style={{ fontSize: '0.78rem', color: 'var(--gray-500)', marginTop: 14, marginBottom: 0 }}>
-            Todos os valores em BRL, por usuário/mês. Alterações valem apenas para esta sessão do navegador.
-          </p>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 10,
+              marginTop: 14,
+            }}
+          >
+            <p style={{ fontSize: '0.78rem', color: 'var(--gray-500)', margin: 0 }}>
+              Todos os valores em BRL, por usuário/mês. As alterações ficam salvas neste navegador.
+            </p>
+            <button
+              type="button"
+              onClick={onReset}
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--border)',
+                color: 'var(--gray-300)',
+                fontSize: '0.74rem',
+                padding: '8px 14px',
+                borderRadius: 6,
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Restaurar valores padrão
+            </button>
+          </div>
         </div>
       )}
     </section>

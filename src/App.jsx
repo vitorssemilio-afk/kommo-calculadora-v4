@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Header from './components/Header'
 import InputsPanel from './components/InputsPanel'
 import PriceConfigPanel from './components/PriceConfigPanel'
@@ -8,6 +8,7 @@ import ConditionsFooter from './components/ConditionsFooter'
 import SummaryView from './components/SummaryView'
 import { DEFAULT_PRICE_TABLE } from './data/kommoData'
 import { calculatePlan } from './utils/calculations'
+import { loadEmpresarialNote, loadPriceTable, saveEmpresarialNote, savePriceTable } from './utils/storage'
 
 const INITIAL_FORM = {
   users: 5,
@@ -19,10 +20,13 @@ const INITIAL_FORM = {
 
 export default function App() {
   const [form, setForm] = useState(INITIAL_FORM)
-  const [priceTable, setPriceTable] = useState(DEFAULT_PRICE_TABLE)
-  const [empresarialNote, setEmpresarialNote] = useState('')
+  const [priceTable, setPriceTable] = useState(() => loadPriceTable(DEFAULT_PRICE_TABLE))
+  const [empresarialNote, setEmpresarialNote] = useState(loadEmpresarialNote)
   const [priceConfigOpen, setPriceConfigOpen] = useState(false)
   const [summaryMode, setSummaryMode] = useState(false)
+
+  useEffect(() => savePriceTable(priceTable), [priceTable])
+  useEffect(() => saveEmpresarialNote(empresarialNote), [empresarialNote])
 
   const handleFormChange = (patch) => setForm((prev) => ({ ...prev, ...patch }))
 
@@ -32,6 +36,8 @@ export default function App() {
       [plan]: { ...prev[plan], [term]: value },
     }))
   }
+
+  const handleResetPrices = () => setPriceTable(DEFAULT_PRICE_TABLE)
 
   const result = useMemo(
     () =>
@@ -60,6 +66,7 @@ export default function App() {
         onToggle={() => setPriceConfigOpen((o) => !o)}
         priceTable={priceTable}
         onPriceChange={handlePriceChange}
+        onReset={handleResetPrices}
         empresarialNote={empresarialNote}
         onNoteChange={setEmpresarialNote}
       />
