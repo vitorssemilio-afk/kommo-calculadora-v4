@@ -1,16 +1,20 @@
 const STORAGE_KEY = 'kommo-calculadora:price-table'
 const NOTE_STORAGE_KEY = 'kommo-calculadora:empresarial-note'
 
+export function mergePriceTable(defaultTable, stored) {
+  if (!stored) return defaultTable
+  const merged = {}
+  for (const plan of Object.keys(defaultTable)) {
+    merged[plan] = { ...defaultTable[plan], ...stored[plan] }
+  }
+  return merged
+}
+
 export function loadPriceTable(defaultTable) {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return defaultTable
-    const stored = JSON.parse(raw)
-    const merged = {}
-    for (const plan of Object.keys(defaultTable)) {
-      merged[plan] = { ...defaultTable[plan], ...stored[plan] }
-    }
-    return merged
+    return mergePriceTable(defaultTable, JSON.parse(raw))
   } catch {
     return defaultTable
   }

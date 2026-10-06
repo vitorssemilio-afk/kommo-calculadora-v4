@@ -1,6 +1,23 @@
 import { PLAN_INFO, PLAN_ORDER, TERMS } from '../data/kommoData'
 
-export default function PriceConfigPanel({ open, onToggle, priceTable, onPriceChange, onReset, empresarialNote, onNoteChange }) {
+const SYNC_LABELS = {
+  loading: { text: 'Verificando sincronização…', color: 'var(--gray-300)' },
+  synced: { text: '● Sincronizado entre dispositivos', color: '#3ddc84' },
+  offline: { text: '● Salvo só neste navegador (sem conexão com o servidor)', color: 'var(--red)' },
+}
+
+export default function PriceConfigPanel({
+  open,
+  onToggle,
+  priceTable,
+  onPriceChange,
+  onReset,
+  empresarialNote,
+  onNoteChange,
+  syncStatus = 'loading',
+}) {
+  const syncInfo = SYNC_LABELS[syncStatus] ?? SYNC_LABELS.loading
+
   return (
     <section className="card" style={{ marginBottom: 24 }}>
       <button
@@ -13,9 +30,14 @@ export default function PriceConfigPanel({ open, onToggle, priceTable, onPriceCh
           alignItems: 'center',
           justifyContent: 'space-between',
           width: '100%',
+          flexWrap: 'wrap',
+          gap: 8,
         }}
       >
-        <span className="eyebrow">Configurar Preços</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span className="eyebrow">Configurar Preços</span>
+          <span style={{ fontSize: '0.7rem', color: syncInfo.color, fontWeight: 600 }}>{syncInfo.text}</span>
+        </span>
         <span style={{ color: 'var(--gray-300)', fontSize: '0.8rem', fontWeight: 400 }}>
           {open ? 'Ocultar ▲' : 'Editar valores oficiais ▼'}
         </span>
@@ -81,7 +103,8 @@ export default function PriceConfigPanel({ open, onToggle, priceTable, onPriceCh
             }}
           >
             <p style={{ fontSize: '0.78rem', color: 'var(--gray-500)', margin: 0 }}>
-              Todos os valores em BRL, por usuário/mês. As alterações ficam salvas neste navegador.
+              Todos os valores em BRL, por usuário/mês. As alterações são sincronizadas automaticamente para
+              qualquer dispositivo que acesse este link.
             </p>
             <button
               type="button"

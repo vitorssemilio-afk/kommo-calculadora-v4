@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Header from './components/Header'
 import InputsPanel from './components/InputsPanel'
 import PriceConfigPanel from './components/PriceConfigPanel'
@@ -8,7 +8,14 @@ import ConditionsFooter from './components/ConditionsFooter'
 import SummaryView from './components/SummaryView'
 import { DEFAULT_PRICE_TABLE } from './data/kommoData'
 import { calculatePlan } from './utils/calculations'
-import { loadEmpresarialNote, loadPriceTable, saveEmpresarialNote, savePriceTable } from './utils/storage'
+import {
+  loadEmpresarialNote,
+  loadPriceTable,
+  mergePriceTable,
+  saveEmpresarialNote,
+  savePriceTable,
+} from './utils/storage'
+import { fetchRemoteState, pushRemoteState } from './utils/syncApi'
 
 const INITIAL_FORM = {
   users: 5,
@@ -24,9 +31,46 @@ export default function App() {
   const [empresarialNote, setEmpresarialNote] = useState(loadEmpresarialNote)
   const [priceConfigOpen, setPriceConfigOpen] = useState(false)
   const [summaryMode, setSummaryMode] = useState(false)
+  const [syncStatus, setSyncStatus] = useState('loading') // 'loading' | 'synced' | 'offline'
+
+  const remoteReady = useRef(false)
+  const pushTimer = useRef(null)
+
+  // Ao abrir, busca o estado mais recente salvo no servidor (compartilhado entre dispositivos)
+  useEffect(() => {
+    let cancelled = false
+    fetchRemoteState()
+      .then(({ priceTable: remoteTable, empresarialNote: remoteNote }) => {
+        if (cancelled) return
+        if (remoteTable) setPriceTable(mergePriceTable(DEFAULT_PRICE_TABLE, remoteTable))
+        if (remoteNote) setEmpresarialNote(remoteNote)
+        setSyncStatus('synced')
+      })
+      .catch(() => {
+        if (!cancelled) setSyncStatus('offline')
+      })
+      .finally(() => {
+        if (!cancelled) remoteReady.current = true
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => savePriceTable(priceTable), [priceTable])
   useEffect(() => saveEmpresarialNote(empresarialNote), [empresarialNote])
+
+  // Envia alterações para o servidor (com debounce), só depois do carregamento inicial
+  useEffect(() => {
+    if (!remoteReady.current) return
+    clearTimeout(pushTimer.current)
+    pushTimer.current = setTimeout(() => {
+      pushRemoteState(priceTable, empresarialNote)
+        .then(() => setSyncStatus('synced'))
+        .catch(() => setSyncStatus('offline'))
+    }, 600)
+    return () => clearTimeout(pushTimer.current)
+  }, [priceTable, empresarialNote])
 
   const handleFormChange = (patch) => setForm((prev) => ({ ...prev, ...patch }))
 
@@ -62,6 +106,7 @@ export default function App() {
       <InputsPanel form={form} onChange={handleFormChange} />
 
       <PriceConfigPanel
+        syncStatus={syncStatus}
         open={priceConfigOpen}
         onToggle={() => setPriceConfigOpen((o) => !o)}
         priceTable={priceTable}
